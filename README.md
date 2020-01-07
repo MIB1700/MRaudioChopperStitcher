@@ -112,4 +112,4 @@ It is of course also possible to run `MRaudioStitcherSliding` on */short[Start/E
     MRaudioStitcherSliding 2
     
     
-## If you use or alter the code, please share the results with me!
+## If you use or alter the code, please share your results with me!
