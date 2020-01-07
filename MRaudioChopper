@@ -15,8 +15,9 @@ set -o errexit
 #the resulting file is transcoded to a .aiff at 44.1kHz
 
 #no checks are made if the files in the directory are actually soundfiles...
-#no checks are made if the /short[End/Start] exist
+#no checks are made if /short[End/Start] exist
 
+# https://github.com/MIB1700/MRaudioChopperStitcher/
 #-----------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------
 

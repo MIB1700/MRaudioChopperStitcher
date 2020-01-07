@@ -5,9 +5,15 @@ set -o errexit
 #-----------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------
 
+#cd to /shortSliding
 
+#Run MRaudioStitcherSliding arg where arg is a positive integer value that is subtracted from 
+#the total length of the file, in seconds, and used as the cross-fade time
 
+#Final file is named output.aiff and should be moved and renamed before running this script 
+#again or it will be overwritten!!
 
+# https://github.com/MIB1700/MRaudioChopperStitcher/
 #-----------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------
 

@@ -5,7 +5,7 @@ set -o errexit
 #-----------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------
 
-#script to take into account the number of files in the directory to decide on the starting
+#script takes into account the number of files in the directory to decide on the starting
 #point of the trim -> each file will start a bit further into the file therefore sliding through
 #all files by the end. This means that at the beginning mostly the opening of the files will be heard
 #and towards the last files only the ending of the files
@@ -19,6 +19,7 @@ set -o errexit
 #no checks are made if the files in the directory are actually soundfiles...
 #no checks are made if /shortSliding exists
 
+# https://github.com/MIB1700/MRaudioChopperStitcher/
 #-----------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------
 

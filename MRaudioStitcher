@@ -7,11 +7,12 @@ set -o errexit
 #to be run in either /short[Start/End]...
 #takes no arguments
 
-#decides on a random fade time depending on the length of the current file
+#decides on a random fade time based on the length of the current file
 
 #final file is named output.aiff and should be moved and renamed before running this script
 #again or it will be overwritten!!
 
+# https://github.com/MIB1700/MRaudioChopperStitcher/
 #-----------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------
 
