@@ -1,0 +1,49 @@
+#! /opt/local/bin/bash
+#-x
+set -o errexit
+
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+
+#takes one argument: integer value that is the amount in seconds the audio file
+#is chopped to
+#a positive value trims the file from the beginning and expects a folder named /shortStart
+#in the pwd
+
+#a negative value trims it from the end and expects a folder named /shortEnd in the pwd
+
+#the resulting file is transcoded to a .aiff at 44.1kHz
+
+#no checks are made if the files in the directory are actually soundfiles...
+#no checks are made if the /short[End/Start] exist
+
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+
+#assign arg 1 to var time; if not set use default 12
+time=${1:-12}
+
+for file in *
+do
+   if [[ -f "$file" ]]; then
+   
+   		filename=${file%.*}
+   		#extension=${file##*.}
+   		
+   		if (( "$time" > 0 )); then
+   		
+			newFile=$(pwd)"/shortStart/""${filename}""_shortStart."aiff
+				
+			ffmpeg -y -i "$file" -ss 0 -to $time -ar 44100 "$newFile"
+		elif (( "$time" < 0 )); then
+			
+			 newFile=$(pwd)"/shortEnd/""${filename}""_shortEnd."aiff
+   				
+			ffmpeg -sseof $time -i "$file" -ar 44100 "$newFile"
+        fi
+                
+   		echo "$newFile"  
+	fi
+done
+
+exit 0

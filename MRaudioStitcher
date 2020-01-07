@@ -1,0 +1,78 @@
+#! /opt/local/bin/bash
+#-x
+set -o errexit
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+
+#to be run in either /short[Start/End]...
+#takes no arguments
+
+#decides on a random fade time depending on the length of the current file
+
+#final file is named output.aiff and should be moved and renamed before running this script
+#again or it will be overwritten!!
+
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+
+num=1
+sr=44100
+sign=1
+
+touch fileOrder.txt
+
+for file in *.aiff
+do 
+	eval $(ffprobe -v quiet -show_format -of flat=s=_ -show_entries stream=duration "$file");
+	duration=${format_duration%.*}; #bash can't do floating point math so truncate!
+	
+	
+	if (( $num > 1 )); then
+		
+		#probability gate: change sign to negative 45% of the time
+    	if (( $(( $RANDOM % 100)) < 45 ));then
+    		
+    		sign=$(( "$sign" * -1 ))
+    	fi
+		
+		crossTime=$(( (RANDOM % ("$duration" / 2)) + ("duration" / 2) + ((RANDOM % 5) * "$sign") ))
+		#calsulate num of samples
+		crossFormat=$(( "$crossTime" * "$sr" ))
+	fi
+	
+	if (( $num == 1 ));then
+	
+		lastFile="$file"
+		
+	elif (( $num == 2 ));then
+		
+		ffmpeg -y -i "$lastFile" -i "$file" -filter_complex acrossfade=ns="$crossFormat":c1=hsin:c2=hsin output.aiff
+		
+	elif (( $num > 2 ));then
+		
+		#make sure we don't use output.aiff as the second input file...
+		#don't need to check for output2.aiff since it gets destroyed at the end of each loop
+		if [[ "$file" != "output.aiff" ]] && [[ "$file" != "output2.aiff" ]]; then
+			
+			ffmpeg -y -i output.aiff -i "$file" -filter_complex acrossfade=ns="$crossFormat":c1=hsin:c2=hsin output2.aiff
+
+			#overwrite output with output2... therefor allowing to keeping using output2
+			mv output2.aiff output.aiff
+			
+		elif [[ "$file" = "output.aiff" ]] || [[ "$file" = "output2.aiff" ]]; then
+		
+			echo ""
+			echo ""
+			echo ""
+			echo "DONE"
+			echo ""
+			echo ""
+			
+			exit 0
+		fi
+	fi
+
+	((num++)) 
+	lastDuration="$duration"
+	
+done   

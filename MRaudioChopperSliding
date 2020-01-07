@@ -1,0 +1,86 @@
+#! /opt/local/bin/bash
+#-x
+set -o errexit
+
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+
+#script to take into account the number of files in the directory to decide on the starting
+#point of the trim -> each file will start a bit further into the file therefore sliding through
+#all files by the end. This means that at the beginning mostly the opening of the files will be heard
+#and towards the last files only the ending of the files
+
+#the duration of the files is 30sec + 1% of the total length of the current file
+
+#the trimmed version is saved to /shortSliding
+
+#the resulting file is transcoded to a .aiff at 44.1kHz
+
+#no checks are made if the files in the directory are actually soundfiles...
+#no checks are made if /shortSliding exists
+
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+
+#number of files in pwd
+fileCount=$(find . -maxdepth 1 -type f | wc -l)
+
+num=1
+sign=1
+
+for file in *
+do
+      
+   if [[ -f "$file" ]]; then #only use on files... does NOT check for soundfiles!!
+	   
+	   	eval $(ffprobe -v quiet -show_format -of flat=s=_ -show_entries stream=duration "$file")
+       	duration=${format_duration}
+    	inDur=${duration%.*} #bash can't do floating point math so truncate!
+    	
+    	fract=$(( ("$inDur" / "$fileCount") ))
+    	
+    	#startTime based on length of file and number of total files
+    	startTime=$(( "$fract" * "$num" ))
+    
+    	#probability gate: change sign to negative 45% of the time
+    	if (( $(( $RANDOM % 100)) < 45 ));then
+    		
+    		sign=$(( "$sign" * -1 ))
+    	fi
+    
+    	endTime=$(( ("$startTime" + 30 + ($inDur / 100)) ))
+
+		((num++)) 
+		 
+		#make sure it snaps to the total duration 
+		if (( "$endTime" >= "$inDur" )); then
+			
+			endTime="$duration"
+		fi  
+		 
+		if (( "$num" >= "$fileCount" )); then
+			
+			#make sure the last file goes until the very end
+			endTime="$duration"
+		fi
+		
+		echo '--------------------------'
+		echo '--------------------------'
+		echo "starttime = " "$startTime"
+  		echo "endtime = " "$endTime"
+  		echo "dur = " $(( ${endTime%.*} - "$startTime" ))
+	    echo '--------------------------'
+		echo '--------------------------'
+		
+        filename=${file%.*}
+   		extension=${file##*.}
+   		
+   		newFile=$(pwd)"/shortSliding/""${filename}""_shortSliding."aiff
+   		
+#   	echo "$newFile"  		
+       ffmpeg -y -i "$file" -ss "$startTime" -to "$endTime" -ar 44100 "$newFile"
+       
+	fi
+done
+
+exit 0
