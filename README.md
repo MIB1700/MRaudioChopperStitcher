@@ -17,7 +17,7 @@ There are 4 seperate scripts that need to be run from the terminal:
 3. MRaudioStitcher
 4. MRaudioStitcherSliding
 
-You need to have **ffmpeg** installed for the scripts to work. 
+You need to have **ffmpeg** (https://ffmpeg.org) installed for the scripts to work. 
 The scripts are pretty basic and dumb. No serious error checking or input checking is done, therefor the following rules should be observed:
 
 - The folder in which the script is run must only contain audio files
