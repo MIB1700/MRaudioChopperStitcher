@@ -10,7 +10,7 @@ https://youtu.be/k-lPCxh8vSQ
 
 
 ## Scripts:
-There are 4 seperate scripts that need to be run from the terminal:
+There are 4 separate scripts that need to be run from the terminal:
 
 1. MRaudioChopper
 2. MRaudioChopperSliding
