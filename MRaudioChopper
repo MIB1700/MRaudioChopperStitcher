@@ -23,28 +23,50 @@ set -o errexit
 
 #assign arg 1 to var time; if not set use default 12
 time=${1:-12}
+shopt -s nullglob # Sets nullglob
+shopt -s nocaseglob # Sets nocaseglob
+shopt -s extglob
 
-for file in *
+mkdir "$(pwd)/shortStart/"
+mkdir "$(pwd)/shortEnd/"
+
+for file in *.@(aa|aac|aiff|aif|alac|au|m4a|mp3|ogg|oga|mogg|opus|raw|wav|wma|webm)
 do
-   if [[ -f "$file" ]]; then
-   
+   if [[ -f "$file" && -e "$file" ]]; then
+
    		filename=${file%.*}
    		#extension=${file##*.}
-   		
+
    		if (( "$time" > 0 )); then
-   		
-			newFile=$(pwd)"/shortStart/""${filename}""_shortStart."aiff
-				
-			ffmpeg -y -i "$file" -ss 0 -to $time -ar 44100 "$newFile"
+
+
+			newFile="$(pwd)/shortStart/${filename}_shortStart.aiff"
+
+			if ! ffmpeg -y -i "$file" -ss 0 -to "$time" -ar 44100 "$newFile"; then
+				 echo "Unable to extrac audio from ${file}" >&2
+				 exit 1
+			fi
+
 		elif (( "$time" < 0 )); then
-			
-			 newFile=$(pwd)"/shortEnd/""${filename}""_shortEnd."aiff
-   				
-			ffmpeg -sseof $time -i "$file" -ar 44100 "$newFile"
+
+
+			newFile="$(pwd)/shortEnd/${filename}_shortEnd.aiff"
+
+			if ! ffmpeg -sseof "$time" -i "$file" -ar 44100 "$newFile"; then
+				 echo "Unable to extrac audio from ${file}" >&2
+				 exit 1
+			fi
         fi
-                
-   		echo "$newFile"  
+
+   		echo "$newFile"
 	fi
 done
+
+rmdir "$(pwd)/shortEnd/"
+rmdir "$(pwd)/shortStart/"
+
+shopt -u nocaseglob # Unsets nocaseglob
+shopt -u nullglob # Unsets nullglob
+shopt -u extglob
 
 exit 0

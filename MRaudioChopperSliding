@@ -23,48 +23,54 @@ set -o errexit
 #-----------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------
 
+shopt -s nullglob # Sets nullglob
+shopt -s nocaseglob # Sets nocaseglob
+shopt -s extglob
+
 #number of files in pwd
 fileCount=$(find . -maxdepth 1 -type f | wc -l)
 
 num=1
 sign=1
 
-for file in *
+mkdir "$(pwd)/shortSliding"
+
+for file in *.@(aa|aac|aiff|aif|alac|au|m4a|mp3|ogg|oga|mogg|opus|raw|wav|wma|webm)
 do
-      
-   if [[ -f "$file" ]]; then #only use on files... does NOT check for soundfiles!!
-	   
-	   	eval $(ffprobe -v quiet -show_format -of flat=s=_ -show_entries stream=duration "$file")
+   if [[ -f "$file" && -e "$file" ]]; then
+
+	   	eval "$(ffprobe -v quiet -show_format -of flat=s=_ -show_entries stream=duration "${file}")"
        	duration=${format_duration}
+
     	inDur=${duration%.*} #bash can't do floating point math so truncate!
-    	
+
     	fract=$(( ("$inDur" / "$fileCount") ))
-    	
+
     	#startTime based on length of file and number of total files
     	startTime=$(( "$fract" * "$num" ))
-    
+
     	#probability gate: change sign to negative 45% of the time
-    	if (( $(( $RANDOM % 100)) < 45 ));then
-    		
+    	if (( $(( RANDOM % 100)) < 45 ));then
+
     		sign=$(( "$sign" * -1 ))
     	fi
-    
-    	endTime=$(( ("$startTime" + 30 + ($inDur / 100)) ))
 
-		((num++)) 
-		 
-		#make sure it snaps to the total duration 
+    	endTime=$(( ("$startTime" + 30 + ("$inDur" / 100)) ))
+
+		((num++))
+
+		#make sure it snaps to the total duration
 		if (( "$endTime" >= "$inDur" )); then
-			
+
 			endTime="$duration"
-		fi  
-		 
+		fi
+
 		if (( "$num" >= "$fileCount" )); then
-			
+
 			#make sure the last file goes until the very end
 			endTime="$duration"
 		fi
-		
+
 		echo '--------------------------'
 		echo '--------------------------'
 		echo "starttime = " "$startTime"
@@ -72,16 +78,22 @@ do
   		echo "dur = " $(( ${endTime%.*} - "$startTime" ))
 	    echo '--------------------------'
 		echo '--------------------------'
-		
-        filename=${file%.*}
-   		extension=${file##*.}
-   		
-   		newFile=$(pwd)"/shortSliding/""${filename}""_shortSliding."aiff
-   		
-#   	echo "$newFile"  		
-       ffmpeg -y -i "$file" -ss "$startTime" -to "$endTime" -ar 44100 "$newFile"
-       
+
+        filename="${file%.*}"
+   		# extension=${file##*.}
+
+   		newFile="$(pwd)/shortSliding/${filename}_shortSliding.aiff"
+
+#   	echo "$newFile"
+       ffmpeg -y -i "${file}" -ss "$startTime" -to "$endTime" -ar 44100 "${newFile}"
+
 	fi
 done
+
+rmdir "$(pwd)/shortSliding"
+
+shopt -u nullglob # Sets nullglob
+shopt -u nocaseglob # Sets nocaseglob
+shopt -u extglob
 
 exit 0
